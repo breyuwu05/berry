@@ -1,53 +1,23 @@
+# Echoes of Memory - Game Overview
 
-Built by https://www.blackbox.ai
+Echoes of Memory is a 3-player cooperative real-time game where players step into the roles of Prince of Memories, Fern, and Fawn. Each level is a journey to recover and restore a lost memory. Every character has a unique gameplay mechanic, and all three must complete their challenges to fully unlock the memory.
 
----
+## Gameplay Loop (Level-Based)
 
-```markdown
-# Echoes of Memory
+### Character Selection & Room Creation
+- One player creates a room, and two others join.
+- Each player selects a unique character: Prince, Fern, or Fawn.
 
-## Project Overview
-**Echoes of Memory** is a web-based multiplayer game that allows players to immerse themselves in a journey of memory recovery. Players can select one of three unique characters, each with specialized abilities, to navigate through missions and puzzles. As players progress, they collect memories and advance through the game's challenges, fostering a collaborative and engaging environment.
+### Level Flow
 
-## Installation
-To get started with **Echoes of Memory**, simply clone this repository and open the `index.html` file in your web browser. There are no additional installations required beyond having a standard web environment.
+- **Fern’s Mission (Combat):**  
+  Battle dark creatures to free a captured memory fragment.
 
-```bash
-git clone <repository-url>
-cd echoes-of-memory
-open index.html
-```
+- **Fawn’s Mission (Maze):**  
+  Navigate a moving enemy-filled maze stealthily to escort a memory to a safe zone.
 
-## Usage
-1. Open `index.html` in your web browser.
-2. Select your character from the available options:
-   - **Prince of Memories**: Puzzle Solver
-   - **Fern**: Combat Specialist
-   - **Fawn**: Stealth Navigator
-3. Once players are selected, click on the "Start Game" button to begin your journey.
-4. Complete your assigned missions and recover memories.
-5. Explore the Memory Gallery after completing missions to view your accomplishments.
+- **Prince’s Mission (Puzzle):**  
+  Solve a jigsaw puzzle using memory fragments collected by Fern and Fawn to restore the full story.
 
-## Features
-- **Character Selection**: Choose from three distinct characters, each providing different gameplay experiences.
-- **Dynamic Gameplay**: Engage in different types of tasks based on the character selected, such as puzzles, combat, or stealth missions.
-- **Memory Gallery**: View the memories collected during your journey and celebrate your progress.
-
-## Dependencies
-The project uses the following dependencies, which are included via CDN links:
-- [Tailwind CSS](https://tailwindcss.com/): For utility-first CSS styling.
-- [Font Awesome](https://fontawesome.com/): For icons.
-
-## Project Structure
-The project structure is simple and consists of the following files:
-
-- `index.html`: The main HTML file containing the game structure, styles, and JavaScript. This file implements the entire user interface and defines the game's essential functionalities.
-
-### Key Sections in `index.html`
-- **Character Selection**: The interface for players to choose their characters.
-- **Game Room**: Displays information while waiting for players to join and initializes the game.
-- **Game Level**: The level where players engage in their main gameplay activities based on their character type.
-- **Memory Gallery**: Displays the memories collected after completing missions.
-
-Feel free to explore and modify the project to enhance your gaming experience!
-```
+### Level Completion
+When all three players complete their respective missions, the full memory is revealed with captions and visuals, completing the level.
