@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Echoes of Memory</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+  <div id="app" class="w-full max-w-4xl">
+    <!-- Character Selection -->
+    <section id="character-selection" class="space-y-6">
+      <h1 class="text-4xl font-bold text-center mb-4">Echoes of Memory</h1>
+      <p class="text-center text-gray-300 mb-6">Select your character to begin the journey</p>
+      <div class="flex justify-center space-x-8">
+        <button data-character="prince" class="character-btn bg-blue-700 hover:bg-blue-600 rounded-lg p-6 w-40 flex flex-col items-center transition">
+          <i class="fas fa-brain fa-3x mb-2"></i>
+          <span class="font-semibold">Prince of Memories</span>
+          <small class="text-gray-300 text-center mt-1">Puzzle Solver</small>
+        </button>
+        <button data-character="fern" class="character-btn bg-red-700 hover:bg-red-600 rounded-lg p-6 w-40 flex flex-col items-center transition">
+          <i class="fas fa-fire fa-3x mb-2"></i>
+          <span class="font-semibold">Fern</span>
+          <small class="text-gray-300 text-center mt-1">Combat Specialist</small>
+        </button>
+        <button data-character="fawn" class="character-btn bg-green-700 hover:bg-green-600 rounded-lg p-6 w-40 flex flex-col items-center transition">
+          <i class="fas fa-mask fa-3x mb-2"></i>
+          <span class="font-semibold">Fawn</span>
+          <small class="text-gray-300 text-center mt-1">Stealth Navigator</small>
+        </button>
+      </div>
+    </section>
+
+    <!-- Game Room -->
+    <section id="game-room" class="hidden space-y-4 mt-8">
+      <h2 class="text-2xl font-bold text-center">Game Room</h2>
+      <p class="text-center text-gray-300">Waiting for other players to join...</p>
+      <div id="selected-character" class="text-center font-semibold"></div>
+      <button id="start-game-btn" class="mt-4 bg-indigo-600 hover:bg-indigo-500 rounded px-4 py-2 disabled:opacity-50" disabled>Start Game</button>
+    </section>
+
+    <!-- Game Level -->
+    <section id="game-level" class="hidden mt-8">
+      <h2 class="text-2xl font-bold mb-4">Level 1: Recover the Memory</h2>
+      <div id="gameplay-area" class="border border-gray-700 rounded p-4 min-h-[300px]">
+        <!-- Dynamic gameplay content will be injected here -->
+      </div>
+      <button id="complete-mission-btn" class="mt-4 bg-green-600 hover:bg-green-500 rounded px-4 py-2">Complete Mission</button>
+    </section>
+
+    <!-- Memory Gallery -->
+    <section id="memory-gallery" class="hidden mt-8">
+      <h2 class="text-2xl font-bold mb-4">Memory Gallery</h2>
+      <div id="gallery-content" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Completed memories will be shown here -->
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Main JavaScript for Echoes of Memory game
+
+    const app = document.getElementById('app');
+    const characterSelection = document.getElementById('character-selection');
+    const gameRoom = document.getElementById('game-room');
+    const gameLevel = document.getElementById('game-level');
+    const memoryGallery = document.getElementById('memory-gallery');
+
+    const selectedCharacterDisplay = document.getElementById('selected-character');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const gameplayArea = document.getElementById('gameplay-area');
+    const completeMissionBtn = document.getElementById('complete-mission-btn');
+
+    let selectedCharacter = null;
+    let missionCompleted = false;
+
+    // Character selection event
+    document.querySelectorAll('.character-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        selectedCharacter = button.getAttribute('data-character');
+        selectedCharacterDisplay.textContent = `You selected: ${capitalize(selectedCharacter)}`;
+        startGameBtn.disabled = false;
+      });
+    });
+
+    // Start game button event
+    startGameBtn.addEventListener('click', () => {
+      characterSelection.classList.add('hidden');
+      gameRoom.classList.remove('hidden');
+      gameRoom.querySelector('p').textContent = 'All players joined. Starting the game...';
+      setTimeout(() => {
+        gameRoom.classList.add('hidden');
+        startLevel();
+      }, 2000);
+    });
+
+    // Start level function
+    function startLevel() {
+      gameLevel.classList.remove('hidden');
+      missionCompleted = false;
+      completeMissionBtn.disabled = false;
+      renderGameplayForCharacter(selectedCharacter);
+    }
+
+    // Render gameplay area based on character
+    function renderGameplayForCharacter(character) {
+      gameplayArea.innerHTML = '';
+      if (character === 'prince') {
+        renderPrincePuzzle();
+      } else if (character === 'fern') {
+        renderFernCombat();
+      } else if (character === 'fawn') {
+        renderFawnStealth();
+      }
+    }
+
+    // Placeholder puzzle for Prince
+    function renderPrincePuzzle() {
+      gameplayArea.innerHTML = \`
+        <p class="mb-2">Prince of Memories: Solve the jigsaw puzzle by arranging pieces.</p>
+        <div class="border border-gray-600 p-4 rounded bg-gray-800 text-center text-gray-300">
+          [Puzzle area - to be implemented]
+        </div>
+      \`;
+    }
+
+    // Placeholder combat for Fern
+    function renderFernCombat() {
+      gameplayArea.innerHTML = \`
+        <p class="mb-2">Fern: Battle dark creatures to free memory fragments.</p>
+        <div class="border border-gray-600 p-4 rounded bg-gray-800 text-center text-gray-300">
+          [Combat area - to be implemented]
+        </div>
+      \`;
+    }
+
+    // Placeholder stealth for Fawn
+    function renderFawnStealth() {
+      gameplayArea.innerHTML = \`
+        <p class="mb-2">Fawn: Navigate the maze stealthily to escort the memory.</p>
+        <div class="border border-gray-600 p-4 rounded bg-gray-800 text-center text-gray-300">
+          [Stealth maze area - to be implemented]
+        </div>
+      \`;
+    }
+
+    // Complete mission button event
+    completeMissionBtn.addEventListener('click', () => {
+      if (!missionCompleted) {
+        missionCompleted = true;
+        completeMissionBtn.disabled = true;
+        alert('Mission completed! Waiting for other players...');
+        // Here we would handle cooperative logic and level progression
+        // For now, just show memory gallery after a delay
+        setTimeout(() => {
+          gameLevel.classList.add('hidden');
+          showMemoryGallery();
+        }, 2000);
+      }
+    });
+
+    // Show memory gallery
+    function showMemoryGallery() {
+      memoryGallery.classList.remove('hidden');
+      const galleryContent = document.getElementById('gallery-content');
+      galleryContent.innerHTML = \`
+        <div class="bg-gray-800 p-4 rounded">
+          <h3 class="font-semibold mb-2">Memory 1</h3>
+          <p>Recovered memory from Level 1.</p>
+        </div>
+      \`;
+    }
+
+    // Utility function
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+</body>
+</html>
