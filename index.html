@@ -55,6 +55,9 @@
       overflow: hidden;
       position: relative;
       color: #e0c3fc; /* Light purple text */
+      font-size: 10px;
+      line-height: 12px;
+      font-family: 'Press Start 2P', cursive;
     }
 
     /* Common button style */
@@ -170,12 +173,40 @@
     0% { text-shadow: 1px 1px 2px #a06000; }
     100% { text-shadow: 1px 1px 8px #f0a020; }
   }
+
+  /* Character sprite container for movement */
+  #character-sprite {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 48px;
+    height: 48px;
+    margin-top: -24px;
+    margin-left: -24px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 24px;
+    line-height: 24px;
+    white-space: pre;
+    color: #306230;
+    text-shadow: 1px 1px #a0d0a0;
+    user-select: none;
+    pointer-events: none;
+  }
+  #character-sprite.prince {
+    color: #306230;
+  }
+  #character-sprite.fern {
+    color: #a04000;
+  }
+  #character-sprite.fawn {
+    color: #306230;
+  }
   </style>
 </head>
 <body>
   <div id="gameboy-screen" role="main" aria-label="Echoes of Memory Gameboy style game">
     <div id="title">ECHOES OF MEMORY</div>
-    <div id="screen-content" tabindex="0">
+    <div id="screen-content" tabindex="0" aria-live="polite" aria-atomic="true">
       <!-- Dynamic content will be injected here -->
     </div>
   </div>
@@ -190,23 +221,39 @@
         name: 'Prince of Memories',
         role: 'Puzzle Solver',
         description: 'Solve jigsaw puzzles using memory fragments.',
+        pixelArt: 
+`  O  
+ /|\\ 
+ / \\ `
       },
       {
         id: 'fern',
         name: 'Fern',
         role: 'Combat Specialist',
         description: 'Battle dark creatures to free memory fragments.',
+        pixelArt: 
+`  O  
+ /|\\ 
+ / \\ `
       },
       {
         id: 'fawn',
         name: 'Fawn',
         role: 'Stealth Navigator',
         description: 'Navigate maze stealthily to escort memory.',
+        pixelArt: 
+`  O  
+ /|\\ 
+ / \\ `
       }
     ];
 
     let selectedCharacter = null;
     let gameStage = 'characterSelection'; // stages: characterSelection, gameRoom, gameplay, memoryGallery
+
+    // Character position for movement in gameplay
+    let charPos = { x: 0, y: 0 };
+    const moveStep = 10; // pixels per move
 
     // Initialize game
     function init() {
@@ -233,74 +280,20 @@
         card.setAttribute('role', 'button');
         card.setAttribute('aria-pressed', 'false');
         card.setAttribute('aria-label', `${char.name}, ${char.role}`);
-      card.innerHTML = `
-          <pre class="character-${char.id}">${getCharacterPixelArt(char.id)}</pre>
+        card.innerHTML = `
+          <pre class="character-${char.id}">${char.pixelArt}</pre>
           <div style="font-size:10px; font-weight:bold;">${char.name}</div>
           <div style="font-size:6px; margin-top:4px;">${char.role}</div>
         `;
-      card.addEventListener('click', () => selectCharacter(char.id));
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          selectCharacter(char.id);
-        }
+        card.addEventListener('click', () => selectCharacter(char.id));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectCharacter(char.id);
+          }
+        });
+        charContainer.appendChild(card);
       });
-      charContainer.appendChild(card);
-    });
-
-    // Function to return pixel art for characters
-    function getCharacterPixelArt(charId) {
-      if (charId === 'prince') {
-        return "  O  \n /|\\ \n / \\ ";
-      } else if (charId === 'fern') {
-        return "  @  \n /|\\ \n / \\ ";
-      } else if (charId === 'fawn') {
-        return "  &  \n /|\\ \n / \\ ";
-      }
-      return "";
-    }
-+
-+    // Keyboard controls
-+    const keysPressed = {};
-+
-+    window.addEventListener('keydown', (e) => {
-+      keysPressed[e.key] = true;
-+      handleControls();
-+    });
-+
-+    window.addEventListener('keyup', (e) => {
-+      keysPressed[e.key] = false;
-+    });
-+
-+    function handleControls() {
-+      // Arrow keys controller
-+      if (keysPressed['ArrowUp']) {
-+        console.log('Arrow Up pressed');
-+      }
-+      if (keysPressed['ArrowDown']) {
-+        console.log('Arrow Down pressed');
-+      }
-+      if (keysPressed['ArrowLeft']) {
-+        console.log('Arrow Left pressed');
-+      }
-+      if (keysPressed['ArrowRight']) {
-+        console.log('Arrow Right pressed');
-+      }
-+
-+      // WASD controller
-+      if (keysPressed['w'] || keysPressed['W']) {
-+        console.log('W pressed');
-+      }
-+      if (keysPressed['a'] || keysPressed['A']) {
-+        console.log('A pressed');
-+      }
-+      if (keysPressed['s'] || keysPressed['S']) {
-+        console.log('S pressed');
-+      }
-+      if (keysPressed['d'] || keysPressed['D']) {
-+        console.log('D pressed');
-+      }
-+    }
 
       const startBtn = document.createElement('button');
       startBtn.className = 'btn center-text';
@@ -401,116 +394,108 @@
       screenContent.appendChild(gameplayText);
       screenContent.appendChild(completeBtn);
 
+      // Add character sprite for movement
+      const charSprite = document.createElement('pre');
+      charSprite.id = 'character-sprite';
+      charSprite.className = selectedCharacter;
+      charSprite.textContent = characters.find(c => c.id === selectedCharacter).pixelArt;
+      screenContent.appendChild(charSprite);
+
+      // Initialize character position in center
+      charPos.x = (screenContent.clientWidth / 2) - (charSprite.clientWidth / 2);
+      charPos.y = (screenContent.clientHeight / 2) - (charSprite.clientHeight / 2);
+      updateCharacterPosition();
+
       // Show mission text based on character
-      if (selectedCharacter === 'prince') {
-        gameplayText.textContent = 'Prince of Memories: Solve the jigsaw puzzle by arranging pieces.';
+      const missionText = {
+        prince: 'Prince of Memories: Solve the jigsaw puzzle by arranging pieces.',
+        fern: 'Fern: Battle dark creatures to free memory fragments.',
+        fawn: 'Fawn: Navigate the maze stealthily to escort the memory.'
+      };
+      gameplayText.textContent = missionText[selectedCharacter];
 
-        // Add pixel art character representation
-        const princeArt = document.createElement('pre');
-        princeArt.style.fontSize = '10px';
-        princeArt.style.lineHeight = '10px';
-        princeArt.style.marginTop = '8px';
-        princeArt.style.color = '#306230';
-        princeArt.style.textShadow = '1px 1px #a0d0a0';
-        princeArt.textContent = "  ▄▄▄▄▄  \n ▐█████▌ \n ▐█▀▀▀█▌ \n ▐█▄█▄█▌ \n  ▀▀▀▀▀  ";
-        gameplayText.appendChild(princeArt);
+      // Add enemy pixel art
+      const enemy = document.createElement('pre');
+      enemy.className = 'enemy';
+      enemy.textContent = "  ▄▄  \n ▐██▌ \n ▐▀▀▌ \n ▐██▌ \n  ▀▀  ";
+      enemy.style.marginTop = '12px';
+      gameplayText.appendChild(enemy);
 
-        // Add simple animation
-        princeArt.animate([
-          { transform: 'translateY(0px)' },
-          { transform: 'translateY(-4px)' },
-          { transform: 'translateY(0px)' }
-        ], {
-          duration: 1000,
-          iterations: Infinity
-        });
+      // Add collectible pixel art
+      const collectible = document.createElement('pre');
+      collectible.className = 'collectible';
+      collectible.textContent = "  ●  \n ●●● \n  ●  ";
+      collectible.style.marginTop = '12px';
+      gameplayText.appendChild(collectible);
+    }
 
-        // Add enemy pixel art
-        const enemy = document.createElement('pre');
-        enemy.className = 'enemy';
-        enemy.textContent = "  ▄▄  \n ▐██▌ \n ▐▀▀▌ \n ▐██▌ \n  ▀▀  ";
-        enemy.style.marginTop = '12px';
-        gameplayText.appendChild(enemy);
+    // Update character sprite position
+    function updateCharacterPosition() {
+      const charSprite = document.getElementById('character-sprite');
+      if (!charSprite) return;
+      // Clamp position within screen-content boundaries
+      const maxX = screenContent.clientWidth - charSprite.clientWidth;
+      const maxY = screenContent.clientHeight - charSprite.clientHeight;
+      charPos.x = Math.min(Math.max(0, charPos.x), maxX);
+      charPos.y = Math.min(Math.max(0, charPos.y), maxY);
+      charSprite.style.left = charPos.x + 'px';
+      charSprite.style.top = charPos.y + 'px';
+    }
 
-        // Add collectible pixel art
-        const collectible = document.createElement('pre');
-        collectible.className = 'collectible';
-        collectible.textContent = "  ●  \n ●●● \n  ●  ";
-        collectible.style.marginTop = '12px';
-        gameplayText.appendChild(collectible);
+    // Keyboard controls for movement
+    const keysPressed = {};
 
-      } else if (selectedCharacter === 'fern') {
-        gameplayText.textContent = 'Fern: Battle dark creatures to free memory fragments.';
-
-        // Add pixel art character representation for Fern
-        const fernArt = document.createElement('pre');
-        fernArt.style.fontSize = '10px';
-        fernArt.style.lineHeight = '10px';
-        fernArt.style.marginTop = '8px';
-        fernArt.style.color = '#a04000'; // reddish-brown color
-        fernArt.style.textShadow = '1px 1px #d08040';
-        fernArt.textContent = "  ▄▄▄▄▄  \n ▐█████▌ \n ▐█▄█▄█▌ \n ▐█▀▀▀█▌ \n  ▀▀▀▀▀  ";
-        gameplayText.appendChild(fernArt);
-
-        fernArt.animate([
-          { transform: 'translateY(0px)' },
-          { transform: 'translateY(-4px)' },
-          { transform: 'translateY(0px)' }
-        ], {
-          duration: 1000,
-          iterations: Infinity
-        });
-
-        // Add enemy pixel art
-        const enemy = document.createElement('pre');
-        enemy.className = 'enemy';
-        enemy.textContent = "  ▄▄  \n ▐██▌ \n ▐▀▀▌ \n ▐██▌ \n  ▀▀  ";
-        enemy.style.marginTop = '12px';
-        gameplayText.appendChild(enemy);
-
-        // Add collectible pixel art
-        const collectible = document.createElement('pre');
-        collectible.className = 'collectible';
-        collectible.textContent = "  ●  \n ●●● \n  ●  ";
-        collectible.style.marginTop = '12px';
-        gameplayText.appendChild(collectible);
-
-      } else if (selectedCharacter === 'fawn') {
-        gameplayText.textContent = 'Fawn: Navigate the maze stealthily to escort the memory.';
-
-        // Add pixel art character representation for Fawn
-        const fawnArt = document.createElement('pre');
-        fawnArt.style.fontSize = '10px';
-        fawnArt.style.lineHeight = '10px';
-        fawnArt.style.marginTop = '8px';
-        fawnArt.style.color = '#306230'; // green color
-        fawnArt.style.textShadow = '1px 1px #a0d0a0';
-        fawnArt.textContent = "  ▄▄▄▄▄  \n ▐█▀▀▀█▌ \n ▐█▄█▄█▌ \n ▐█████▌ \n  ▀▀▀▀▀  ";
-        gameplayText.appendChild(fawnArt);
-
-        fawnArt.animate([
-          { transform: 'translateY(0px)' },
-          { transform: 'translateY(-4px)' },
-          { transform: 'translateY(0px)' }
-        ], {
-          duration: 1000,
-          iterations: Infinity
-        });
-
-        // Add enemy pixel art
-        const enemy = document.createElement('pre');
-        enemy.className = 'enemy';
-        enemy.textContent = "  ▄▄  \n ▐██▌ \n ▐▀▀▌ \n ▐██▌ \n  ▀▀  ";
-        enemy.style.marginTop = '12px';
-        gameplayText.appendChild(enemy);
-
-        // Add collectible pixel art
-        const collectible = document.createElement('pre');
-        collectible.className = 'collectible';
-        collectible.textContent = "  ●  \n ●●● \n  ●  ";
-        collectible.style.marginTop = '12px';
-        gameplayText.appendChild(collectible);
+    window.addEventListener('keydown', (e) => {
+      keysPressed[e.key] = true;
+      if (gameStage === 'gameplay') {
+        handleMovement();
       }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keysPressed[e.key] = false;
+    });
+
+    function handleMovement() {
+      let moved = false;
+      if (keysPressed['ArrowUp'] || keysPressed['w'] || keysPressed['W']) {
+        charPos.y -= moveStep;
+        moved = true;
+      }
+      if (keysPressed['ArrowDown'] || keysPressed['s'] || keysPressed['S']) {
+        charPos.y += moveStep;
+        moved = true;
+      }
+      if (keysPressed['ArrowLeft'] || keysPressed['a'] || keysPressed['A']) {
+        charPos.x -= moveStep;
+        moved = true;
+      }
+      if (keysPressed['ArrowRight'] || keysPressed['d'] || keysPressed['D']) {
+        charPos.x += moveStep;
+        moved = true;
+      }
+      if (moved) {
+        updateCharacterPosition();
+      }
+    }
+
+    // Placeholder for memory gallery screen
+    function renderMemoryGallery() {
+      gameStage = 'memoryGallery';
+      screenContent.innerHTML = '';
+
+      const title = document.createElement('div');
+      title.className = 'center-text';
+      title.style.marginBottom = '8px';
+      title.textContent = 'MEMORY GALLERY';
+
+      const info = document.createElement('div');
+      info.className = 'center-text';
+      info.style.fontSize = '8px';
+      info.textContent = 'Gallery coming soon...';
+
+      screenContent.appendChild(title);
+      screenContent.appendChild(info);
     }
 
     // Initialize game on page load
